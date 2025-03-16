@@ -79,4 +79,14 @@ app.use((req, res) => {
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
+    // Aggiungi questo nelle route esistenti
+app.get('*', (req, res) => {
+  // Controlla se è una richiesta API
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  
+  // Altrimenti, serve sempre index.html per gestire le route lato client
+  sendHtmlFile(res, 'index.html');
+    
 });
