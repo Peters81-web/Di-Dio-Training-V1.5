@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentUser = session.user;
         return session;
     };
-
+    
     // Inizializza selettori di data
     const initDateSelectors = () => {
         const yearSelect = document.getElementById('year-select');
@@ -156,11 +156,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Cella con nome giorno e data
             const dayCell = document.createElement('td');
-            dayCell.innerHTML = `<strong>${dayName}</strong><br>${date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })}`;
+            dayCell.dataset.label = "Giorno";
+            dayCell.classList.add('day-cell');
+            dayCell.innerHTML = `${dayName}<span class="day-date">${date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })}</span>`;
             row.appendChild(dayCell);
             
             // Cella per l'attività
             const activityCell = document.createElement('td');
+            activityCell.dataset.label = "Attività";
             activityCell.classList.add('workout-cell');
             activityCell.innerHTML = `
                 <select class="workout-type-select" data-date="${date.toISOString()}">
@@ -171,14 +174,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <option value="hiit">HIIT</option>
                     <option value="recupero">Recupero Attivo</option>
                 </select>
-                <button class="add-workout-btn" onclick="addWorkoutItem(this)" style="display:none">
-                    <i class="fas fa-plus"></i>
-                </button>
             `;
             row.appendChild(activityCell);
             
             // Cella per la descrizione
             const descriptionCell = document.createElement('td');
+            descriptionCell.dataset.label = "Descrizione";
             descriptionCell.classList.add('workout-description');
             descriptionCell.innerHTML = `<textarea placeholder="Descrivi il tuo allenamento qui..."></textarea>`;
             row.appendChild(descriptionCell);
@@ -282,33 +283,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } finally {
             hideLoading(loading);
         }
-    };
-    
-    // Aggiungi un nuovo elemento allenamento
-    window.addWorkoutItem = (button) => {
-        const cell = button.closest('.workout-cell');
-        const newItemHtml = `
-            <div class="workout-item">
-                <select class="workout-type-select">
-                    <option value="cardio">Cardio</option>
-                    <option value="forza">Allenamento Forza</option>
-                    <option value="flessibilita">Flessibilità</option>
-                    <option value="hiit">HIIT</option>
-                    <option value="recupero">Recupero Attivo</option>
-                </select>
-                <button class="remove-workout-btn" onclick="removeWorkoutItem(this)">
-                    <i class="fas fa-minus"></i>
-                </button>
-            </div>
-        `;
-        
-        cell.insertAdjacentHTML('beforeend', newItemHtml);
-    };
-    
-    // Rimuovi un elemento allenamento
-    window.removeWorkoutItem = (button) => {
-        const item = button.closest('.workout-item');
-        item.remove();
     };
     
     // Logout
