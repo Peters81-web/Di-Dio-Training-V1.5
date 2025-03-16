@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracciamento Allenamenti - Riepilogo Settimanale</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="/css/styles.css">
     <style>
         /* Stili specifici per il riepilogo settimanale */
@@ -52,6 +50,29 @@
             white-space: nowrap;
         }
         
+        .selector-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 576px) {
+            .selector-group {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+            
+            .selector-group select {
+                width: 100%;
+            }
+            
+            .month-selector label {
+                min-width: 80px;
+            }
+        }
+        
         select {
             padding: 10px;
             border-radius: 8px;
@@ -59,28 +80,6 @@
             background-color: white;
             font-size: 16px;
             min-width: 100px;
-        }
-        
-        @media (max-width: 576px) {
-            select {
-                width: 100%;
-            }
-            
-            .month-selector {
-                flex-direction: column;
-                align-items: flex-start;
-                width: 100%;
-            }
-            
-            .month-selector > div {
-                width: 100%;
-                display: flex;
-                align-items: center;
-            }
-            
-            .month-selector label {
-                width: 80px;
-            }
         }
         
         .summary-table {
@@ -98,65 +97,34 @@
             font-weight: 600;
         }
         
+        .summary-table th:first-child {
+            border-top-left-radius: 8px;
+        }
+        
+        .summary-table th:last-child {
+            border-top-right-radius: 8px;
+        }
+        
         .summary-table td {
             padding: 15px;
             border-bottom: 1px solid #e1e1e1;
             vertical-align: top;
         }
         
-        @media (max-width: 768px) {
-            .summary-table th,
-            .summary-table td {
-                padding: 10px 8px;
-                font-size: 14px;
-            }
+        .summary-table tr:last-child td {
+            border-bottom: none;
         }
         
-        @media (max-width: 576px) {
-            /* Layout alternativo per mobile */
-            .summary-table, 
-            .summary-table tbody, 
-            .summary-table tr {
-                display: block;
-                width: 100%;
-            }
-            
-            .summary-table thead {
-                display: none;
-            }
-            
-            .summary-table tr {
-                margin-bottom: 15px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-            
-            .summary-table td {
-                display: block;
-                text-align: right;
-                padding: 10px;
-                position: relative;
-                padding-left: 35%;
-                min-height: 30px;
-            }
-            
-            .summary-table td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 10px;
-                width: 30%;
-                padding-right: 10px;
-                text-align: left;
-                font-weight: bold;
-            }
-            
-            .summary-table td:first-child {
-                background-color: #f8f9fa;
-                text-align: left;
-                padding-left: 10px;
-                font-weight: bold;
-            }
+        .day-cell {
+            font-weight: 600;
+        }
+        
+        .day-date {
+            display: block;
+            color: #777;
+            font-size: 0.9em;
+            font-weight: normal;
+            margin-top: 3px;
         }
         
         .workout-description textarea {
@@ -166,6 +134,27 @@
             border-radius: 8px;
             min-height: 80px;
             resize: vertical;
+            transition: border-color 0.2s;
+        }
+        
+        .workout-description textarea:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .workout-type-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+        
+        .workout-type-select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
         
         .save-btn {
@@ -191,18 +180,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
-        .day-cell {
-            font-weight: 600;
-        }
-        
-        .day-date {
-            display: block;
-            color: #777;
-            font-size: 0.9em;
-            font-weight: normal;
-            margin-top: 3px;
-        }
-        
         #week-range {
             padding: 8px 12px;
             background-color: #f0f8ff;
@@ -214,6 +191,61 @@
         @media (min-width: 768px) {
             #week-range {
                 text-align: right;
+            }
+        }
+        
+        /* Mobile Responsive Table */
+        @media (max-width: 768px) {
+            .summary-table thead {
+                display: none;
+            }
+            
+            .summary-table, 
+            .summary-table tbody, 
+            .summary-table tr, 
+            .summary-table td {
+                display: block;
+                width: 100%;
+            }
+            
+            .summary-table tr {
+                margin-bottom: 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                overflow: hidden;
+                background-color: #fff;
+            }
+            
+            .summary-table td {
+                position: relative;
+                padding: 12px 12px 12px 35%;
+                text-align: left;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .summary-table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 12px;
+                width: 30%;
+                white-space: nowrap;
+                font-weight: bold;
+                color: #555;
+            }
+            
+            .summary-table td:first-child {
+                padding-left: 12px;
+                font-weight: bold;
+                background-color: #f8f9fa;
+            }
+            
+            .day-date {
+                display: inline;
+                margin-left: 8px;
+            }
+            
+            .workout-description textarea {
+                min-height: 60px;
             }
         }
     </style>
@@ -239,7 +271,7 @@
                     <i class="fas fa-chart-line"></i>
                     <span>Statistiche</span>
                 </button>
-                <button id="logoutBtn" class="btn">
+                <button id="logoutBtn" class="btn btn-danger">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Esci</span>
                 </button>
@@ -247,8 +279,8 @@
         </div>
     </nav>
     
-    <main class="container">
-        <h2 style="margin: 20px 0; display: flex; align-items: center; gap: 10px;">
+    <main class="container" style="padding-top: 1.5rem; padding-bottom: 2rem;">
+        <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: 700;">
             <i class="fas fa-calendar-week" style="color: #3498db;"></i>
             Riepilogo Settimanale
         </h2>
@@ -256,17 +288,17 @@
         <div class="week-summary">
             <div class="summary-header">
                 <div class="month-selector">
-                    <div>
+                    <div class="selector-group">
                         <label for="year-select">Anno:</label>
                         <select id="year-select">
                             <!-- Options will be added by JavaScript -->
                         </select>
                     </div>
                     
-                    <div>
+                    <div class="selector-group">
                         <label for="month-select">Mese:</label>
                         <select id="month-select">
-                            <option value="0">Gennaio</option>
+                           <option value="0">Gennaio</option>
                             <option value="1">Febbraio</option>
                             <option value="2">Marzo</option>
                             <option value="3">Aprile</option>
@@ -281,7 +313,7 @@
                         </select>
                     </div>
                     
-                    <div>
+                    <div class="selector-group">
                         <label for="week-select">Settimana:</label>
                         <select id="week-select">
                             <!-- Options will be added by JavaScript -->
@@ -296,9 +328,9 @@
                 <table class="summary-table">
                     <thead>
                         <tr>
-                            <th>Giorno</th>
-                            <th>Attività</th>
-                            <th>Descrizione</th>
+                            <th width="20%">Giorno</th>
+                            <th width="30%">Attività</th>
+                            <th width="50%">Descrizione</th>
                         </tr>
                     </thead>
                     <tbody id="summary-table-body">
@@ -319,6 +351,7 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/utils.js"></script>
     <script src="/js/supabase-config.js"></script>
     <script src="/js/weekly_summary.js"></script>
