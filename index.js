@@ -71,22 +71,18 @@ app.get('/profile', (req, res) => {
     sendHtmlFile(res, 'profile.html');
 });
 
-// Gestione errori 404
-app.use((req, res) => {
-    sendHtmlFile(res, '404.html');
+// Gestione di tutte le altre route
+app.get('*', (req, res) => {
+    // Controlla se è una richiesta API
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    
+    // Altrimenti, serve sempre index.html per gestire le route lato client
+    sendHtmlFile(res, 'index.html');
 });
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
-    // Aggiungi questo nelle route esistenti
-app.get('*', (req, res) => {
-  // Controlla se è una richiesta API
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
-  }
-  
-  // Altrimenti, serve sempre index.html per gestire le route lato client
-  sendHtmlFile(res, 'index.html');
-    
 });
