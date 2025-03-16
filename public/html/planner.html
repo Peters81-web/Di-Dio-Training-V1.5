@@ -8,25 +8,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body class="planner-page">
+<body>
     <nav class="navbar">
         <div class="container">
             <h1 class="navbar-brand">Pianificatore Allenamenti</h1>
-            <div class="nav-buttons">
-                <button onclick="window.location.href='/dashboard'" class="btn btn-nav">
+            <div class="nav-links">
+                <button onclick="window.location.href='/dashboard'" class="btn">
                     <i class="fas fa-home"></i>
                     Dashboard
                 </button>
-                <button onclick="window.location.href='/stats'" class="btn btn-nav">
+                <button onclick="window.location.href='/stats'" class="btn">
                     <i class="fas fa-chart-line"></i>
                     Statistiche
                 </button>
-                <button id="notificationsBtn" class="btn btn-notification">
+                <button id="notificationsBtn" class="btn">
                     <i class="fas fa-bell"></i>
                     Notifiche
                     <span class="notification-badge" id="notificationCount">0</span>
                 </button>
-                <button id="logoutBtn" class="btn btn-logout">
+                <button id="logoutBtn" class="btn btn-danger">
                     <i class="fas fa-sign-out-alt"></i>
                     Esci
                 </button>
@@ -34,9 +34,9 @@
         </div>
     </nav>
 
-    <main class="container planner-content">
-        <div class="planner-header">
-            <h2>I Tuoi Programmi</h2>
+    <main class="container" style="padding-top: 1rem; padding-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 700;">I Tuoi Programmi</h2>
             <button id="newProgramBtn" class="btn btn-primary">
                 <i class="fas fa-plus"></i>
                 Nuovo Programma
@@ -56,7 +56,7 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <form id="programForm" class="program-form">
+            <form id="programForm">
                 <div class="form-group">
                     <label for="programName">Nome Programma</label>
                     <input
@@ -99,12 +99,12 @@
                     >
                 </div>
                 <div class="modal-actions">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i>
-                        Salva Programma
-                    </button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('programModal')">
                         Annulla
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Salva Programma
                     </button>
                 </div>
             </form>
