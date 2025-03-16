@@ -1,3 +1,5 @@
+// public/js/utils.js
+
 // Funzione per mostrare il loading spinner
 const showLoading = () => {
     const loading = document.createElement('div');
@@ -66,85 +68,69 @@ const formatDate = (dateString) => {
     });
 };
 
-// Aggiungi gli stili necessari
-const addUtilStyles = () => {
-    if (document.getElementById('utilStyles')) return;
+// Funzione per toggle menu mobile
+const toggleMobileMenu = () => {
+    const navLinks = document.querySelector('.nav-links');
+    if (navLinks) {
+        navLinks.classList.toggle('active');
+    }
+};
+
+// Aggiungi gli stili necessari e setup mobile menu
+const initResponsiveUI = () => {
+    // Verifica se esiste già il toggle menu mobile
+    if (!document.querySelector('.mobile-menu-toggle')) {
+        const navbar = document.querySelector('.navbar .container');
+        if (navbar) {
+            const mobileToggle = document.createElement('button');
+            mobileToggle.className = 'mobile-menu-toggle';
+            mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            mobileToggle.addEventListener('click', toggleMobileMenu);
+            
+            // Inserisci dopo il brand
+            const brand = navbar.querySelector('.navbar-brand') || navbar.querySelector('h1');
+            if (brand && brand.nextSibling) {
+                navbar.insertBefore(mobileToggle, brand.nextSibling);
+            } else {
+                navbar.appendChild(mobileToggle);
+            }
+            
+            // Assicurati che i nav-links abbiano la classe corretta
+            const navLinks = navbar.querySelector('.nav-buttons, .nav-links');
+            if (navLinks) {
+                navLinks.classList.add('nav-links');
+                if (navLinks.classList.contains('nav-buttons')) {
+                    navLinks.classList.remove('nav-buttons');
+                }
+            }
+        }
+    }
     
-    const style = document.createElement('style');
-    style.id = 'utilStyles';
-    style.textContent = `
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 24px;
-            border-radius: 4px;
-            color: white;
-            z-index: 10000;
-            animation: slideUp 0.3s ease-out;
-        }
-        
-        .toast.info {
-            background-color: #3498db;
-        }
-        
-        .toast.error {
-            background-color: #e74c3c;
-        }
-        
-        .toast.success {
-            background-color: #2ecc71;
-        }
-        
-        .toast.warning {
-            background-color: #f39c12;
-        }
-        
-        .toast-fade-out {
-            opacity: 0;
-            transition: opacity 0.3s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translate(-50%, 100%); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
-        }
-    `;
-    
-    document.head.appendChild(style);
+    // Adatta tabelle per mobile
+    const tables = document.querySelectorAll('table:not(.responsive-ready)');
+    tables.forEach(table => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-responsive';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+        table.classList.add('responsive-ready');
+    });
 };
 
 // Esegui al caricamento
-document.addEventListener('DOMContentLoaded', addUtilStyles);
+document.addEventListener('DOMContentLoaded', () => {
+    initResponsiveUI();
+    
+    // Rileva cambiamenti nel DOM per adattare dinamicamente
+    const observer = new MutationObserver(() => {
+        initResponsiveUI();
+    });
+    
+    observer.observe(document.body, { 
+        childList: true, 
+        subtree: true 
+    });
+});
 
 // Esporta funzioni
 window.showLoading = showLoading;
@@ -153,3 +139,4 @@ window.showToast = showToast;
 window.closeModal = closeModal;
 window.getUrlParams = getUrlParams;
 window.formatDate = formatDate;
+window.toggleMobileMenu = toggleMobileMenu;
