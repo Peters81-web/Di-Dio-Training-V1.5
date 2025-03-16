@@ -34,7 +34,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+    background: #1a1a1a; /* Colore di fallback */
 }
 
 .auth-container {
@@ -133,6 +136,35 @@ body {
     color: var(--primary-color);
     text-decoration: none;
     font-weight: 500;
+}
+
+.auth-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        linear-gradient(135deg,
+            rgba(0, 0, 0, 0.7),
+            rgba(0, 0, 0, 0.5)),
+        url('/images/corsa.jpg'); /* Assicurati che questo percorso sia corretto */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+    animation: zoomEffect 30s ease infinite alternate;
+}
+
+/* Aggiungi questa animazione per un leggero effetto zoom sullo sfondo */
+@keyframes zoomEffect {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.1);
+    }
 }
 
 /* Modal styles */
