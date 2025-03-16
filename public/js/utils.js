@@ -1,5 +1,3 @@
-// public/js/utils.js
-
 // Funzione per mostrare il loading spinner
 const showLoading = () => {
     const loading = document.createElement('div');
@@ -91,6 +89,8 @@ const initResponsiveUI = () => {
             const brand = navbar.querySelector('.navbar-brand') || navbar.querySelector('h1');
             if (brand && brand.nextSibling) {
                 navbar.insertBefore(mobileToggle, brand.nextSibling);
+            } else if (brand) {
+                navbar.insertBefore(mobileToggle, brand.nextElementSibling);
             } else {
                 navbar.appendChild(mobileToggle);
             }
@@ -109,10 +109,12 @@ const initResponsiveUI = () => {
     // Adatta tabelle per mobile
     const tables = document.querySelectorAll('table:not(.responsive-ready)');
     tables.forEach(table => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'table-responsive';
-        table.parentNode.insertBefore(wrapper, table);
-        wrapper.appendChild(table);
+        if (table.parentNode && !table.parentNode.classList.contains('table-responsive')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-responsive';
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        }
         table.classList.add('responsive-ready');
     });
 };
@@ -120,16 +122,6 @@ const initResponsiveUI = () => {
 // Esegui al caricamento
 document.addEventListener('DOMContentLoaded', () => {
     initResponsiveUI();
-    
-    // Rileva cambiamenti nel DOM per adattare dinamicamente
-    const observer = new MutationObserver(() => {
-        initResponsiveUI();
-    });
-    
-    observer.observe(document.body, { 
-        childList: true, 
-        subtree: true 
-    });
 });
 
 // Esporta funzioni
@@ -140,3 +132,4 @@ window.closeModal = closeModal;
 window.getUrlParams = getUrlParams;
 window.formatDate = formatDate;
 window.toggleMobileMenu = toggleMobileMenu;
+window.initResponsiveUI = initResponsiveUI;
