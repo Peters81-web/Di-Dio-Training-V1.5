@@ -518,6 +518,78 @@ table th, table td {
     }
 }
 
+/* Dashboards cards */
+.stat-card {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+.stat-card-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.5rem;
+}
+
+.stat-info {
+    text-align: right;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Responsive fixes for mobile */
+@media (max-width: 576px) {
+    html, body {
+        font-size: 14px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .btn {
+        padding: 0.6rem 1rem;
+    }
+    
+    .container {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+    
+    .modal-content {
+        padding: 1rem;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .auth-card {
+        padding: 1.5rem;
+    }
+}
+
 /* Support for dark mode */
 @media (prefers-color-scheme: dark) {
     :root {
@@ -528,7 +600,7 @@ table th, table td {
         --white: #1e1e1e;
     }
     
-    .auth-card, .modal-content, .card, .week-summary {
+    .auth-card, .modal-content, .card, .week-summary, .stat-card {
         background-color: #252525;
     }
     
