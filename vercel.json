@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    { "src": "/dashboard", "dest": "/" },
+    { "src": "/planner", "dest": "/" },
+    { "src": "/workout", "dest": "/" },
+    { "src": "/stats", "dest": "/" },
+    { "src": "/weekly_summary", "dest": "/" },
+    { "src": "/profile", "dest": "/" },
+    { "src": "/register", "dest": "/" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/" }
+  ]
+}
