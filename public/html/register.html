@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tracciamento Allenamenti - Registrazione</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body class="auth-page">
@@ -23,21 +24,21 @@
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" class="form-control" placeholder="Scegli una password" required minlength="8">
-                    <small class="form-help">
+                    <small style="display: block; margin-top: 0.25rem; color: #6c757d; font-size: 0.875rem;">
                         La password deve contenere almeno 8 caratteri, una lettera maiuscola,
                         una minuscola e un numero
                     </small>
-                    <div class="password-strength" id="passwordStrength">
-                        <div class="password-strength-item" id="lengthCheck">Almeno 8 caratteri</div>
-                        <div class="password-strength-item" id="upperCheck">Almeno una lettera maiuscola</div>
-                        <div class="password-strength-item" id="lowerCheck">Almeno una lettera minuscola</div>
-                        <div class="password-strength-item" id="numberCheck">Almeno un numero</div>
+                    <div style="margin-top: 0.75rem;">
+                        <div class="password-strength-item" id="lengthCheck" style="margin-bottom: 0.25rem; color: #6c757d; font-size: 0.875rem;">Almeno 8 caratteri</div>
+                        <div class="password-strength-item" id="upperCheck" style="margin-bottom: 0.25rem; color: #6c757d; font-size: 0.875rem;">Almeno una lettera maiuscola</div>
+                        <div class="password-strength-item" id="lowerCheck" style="margin-bottom: 0.25rem; color: #6c757d; font-size: 0.875rem;">Almeno una lettera minuscola</div>
+                        <div class="password-strength-item" id="numberCheck" style="margin-bottom: 0.25rem; color: #6c757d; font-size: 0.875rem;">Almeno un numero</div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="confirmPassword">Conferma Password</label>
                     <input type="password" id="confirmPassword" class="form-control" placeholder="Conferma la password" required>
-                    <div class="form-error" id="passwordMatchError" style="display: none;">
+                    <div class="form-error" id="passwordMatchError" style="display: none; color: #dc3545; margin-top: 0.25rem; font-size: 0.875rem;">
                         Le password non corrispondono
                     </div>
                 </div>
@@ -52,9 +53,9 @@
         </div>
     </div>
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="text/javascript" src="/js/utils.js"></script>
-    <script type="text/javascript" src="/js/supabase-config.js"></script>
-    <script type="text/javascript" src="/js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/supabase-config.js"></script>
+    <script src="/js/auth.js"></script>
 </body>
 </html>
