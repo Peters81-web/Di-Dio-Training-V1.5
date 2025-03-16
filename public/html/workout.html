@@ -8,29 +8,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body class="create-workout-page bg-gray-100">
-    <nav class="navbar bg-white shadow-md">
-        <div class="container mx-auto px-4 py-3">
+<body>
+    <nav class="navbar">
+        <div class="container">
             <h1 class="navbar-brand">
                 <i class="fas fa-dumbbell mr-2"></i>
                 Crea Nuovo Allenamento
             </h1>
-            <div class="nav-buttons">
-                <button onclick="window.location.href='/dashboard'" class="btn btn-nav">
+            <div class="nav-links">
+                <button onclick="window.location.href='/dashboard'" class="btn">
                     <i class="fas fa-arrow-left"></i>
-                    Torna alla Dashboard
+                    <span>Torna alla Dashboard</span>
                 </button>
             </div>
         </div>
     </nav>
 
-    <main class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <form id="workoutForm" class="workout-form space-y-6">
+    <main class="container" style="padding-top: 1.5rem; padding-bottom: 2rem;">
+        <div class="card">
+            <form id="workoutForm" style="display: grid; gap: 1.5rem;">
                 <!-- Sezione Info Base -->
                 <div class="form-section">
-                    <h3 class="text-xl font-semibold mb-4">Informazioni Base</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-color);">Informazioni Base</h3>
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="workoutName">Nome Allenamento</label>
                             <input
@@ -52,8 +52,8 @@
 
                 <!-- Sezione Dettagli -->
                 <div class="form-section">
-                    <h3 class="text-xl font-semibold mb-4">Dettagli Allenamento</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-color);">Dettagli Allenamento</h3>
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="duration">Durata (minuti)</label>
                             <input
@@ -88,8 +88,8 @@
 
                 <!-- Sezione Fasi -->
                 <div class="form-section">
-                    <h3 class="text-xl font-semibold mb-4">Fasi dell'Allenamento</h3>
-                    <div class="space-y-4">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-color);">Fasi dell'Allenamento</h3>
+                    <div style="display: grid; gap: 1rem;">
                         <div class="form-group">
                             <label for="warmup">Riscaldamento</label>
                             <textarea
@@ -125,7 +125,7 @@
 
                 <!-- Note Aggiuntive -->
                 <div class="form-section">
-                    <h3 class="text-xl font-semibold mb-4">Note Aggiuntive</h3>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-color);">Note Aggiuntive</h3>
                     <div class="form-group">
                         <textarea
                             id="notes"
@@ -137,7 +137,7 @@
                 </div>
 
                 <!-- Pulsanti Form -->
-                <div class="form-actions flex justify-end space-x-4">
+                <div class="modal-actions">
                     <button type="button" onclick="window.location.href='/dashboard'" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Annulla
                     </button>
