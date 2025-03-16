@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo Utente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1>Profilo Utente</h1>
+            <div class="nav-links">
+                <button onclick="window.location.href='/dashboard'">Dashboard</button>
+                <button onclick="window.location.href='/stats'">Statistiche</button>
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-container">
+            <div class="profile-card">
+                <h2>Informazioni Profilo</h2>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" readonly>
+                    </div>
+                    <button type="submit">Aggiorna Profilo</button>
+                </form>
+            </div>
+            <div class="profile-card">
+                <h2>Preferenze</h2>
+                <form id="preferencesForm">
+                    <div class="form-group">
+                        <label for="distanceUnit">Unità di Distanza</label>
+                        <select id="distanceUnit">
+                            <option value="km">Chilometri</option>
+                            <option value="mi">Miglia</option>
+                        </select>
+                    </div>
+                    <button type="submit">Salva Preferenze</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/supabase-config.js"></script>
+    <script src="/js/profile.js"></script>
+</body>
+</html>

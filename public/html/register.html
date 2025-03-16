@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tracciamento Allenamenti - Registrazione</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="auth-title">Registrazione</h1>
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="username">Nome Utente</label>
+                    <input type="text" id="username" class="form-control" placeholder="Scegli un nome utente" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" class="form-control" placeholder="Inserisci la tua email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Scegli una password" required minlength="8">
+                    <small class="form-help">
+                        La password deve contenere almeno 8 caratteri, una lettera maiuscola,
+                        una minuscola e un numero
+                    </small>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="password-strength-item" id="lengthCheck">Almeno 8 caratteri</div>
+                        <div class="password-strength-item" id="upperCheck">Almeno una lettera maiuscola</div>
+                        <div class="password-strength-item" id="lowerCheck">Almeno una lettera minuscola</div>
+                        <div class="password-strength-item" id="numberCheck">Almeno un numero</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Conferma Password</label>
+                    <input type="password" id="confirmPassword" class="form-control" placeholder="Conferma la password" required>
+                    <div class="form-error" id="passwordMatchError" style="display: none;">
+                        Le password non corrispondono
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Registrati</button>
+            </form>
+            <p class="auth-footer">
+                Hai già un account? <a href="/">Accedi</a>
+            </p>
+        </div>
+        <div class="copyright">
+            © 2025 Pietro Di Dio. Tutti i diritti riservati.
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="text/javascript" src="/js/utils.js"></script>
+    <script type="text/javascript" src="/js/supabase-config.js"></script>
+    <script type="text/javascript" src="/js/auth.js"></script>
+</body>
+</html>
