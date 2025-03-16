@@ -1,4 +1,4 @@
-// Funzioni di autenticazione
+// public/js/auth.js
 document.addEventListener('DOMContentLoaded', function() {
     // Inizializzazione Supabase
     const supabaseClient = createSupabaseClient();
@@ -48,6 +48,8 @@ function setupAuthListeners(supabaseClient) {
                 }
                 
                 showToast('Accesso effettuato con successo!', 'success');
+                
+                // Usa un reindirizzamento completo per navigare alla dashboard
                 window.location.href = '/dashboard';
             } catch (error) {
                 console.error('Errore di login:', error);
