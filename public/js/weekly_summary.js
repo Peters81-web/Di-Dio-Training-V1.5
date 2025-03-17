@@ -16,33 +16,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         return session;
     };
     
-    // Inizializza selettori di data
-    const initDateSelectors = () => {
-        const yearSelect = document.getElementById('year-select');
-        const monthSelect = document.getElementById('month-select');
-        const weekSelect = document.getElementById('week-select');
-        
-        // Popola anni
-        const currentYear = new Date().getFullYear();
-        for (let year = currentYear; year >= currentYear - 2; year--) {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            yearSelect.appendChild(option);
-        }
-        
-        // Inizializza mese corrente
-        const currentMonth = new Date().getMonth();
-        monthSelect.value = currentMonth;
-        
-        // Event listeners
-        yearSelect.addEventListener('change', updateWeekOptions);
-        monthSelect.addEventListener('change', updateWeekOptions);
-        weekSelect.addEventListener('change', loadSelectedWeekData);
-        
-        // Inizializza opzioni settimane
-        updateWeekOptions();
-    };
+ // Modifica alla funzione initDateSelectors nel file weekly_summary.js
+
+const initDateSelectors = () => {
+    const yearSelect = document.getElementById('year-select');
+    const monthSelect = document.getElementById('month-select');
+    const weekSelect = document.getElementById('week-select');
+    
+    // Svuota le opzioni esistenti
+    yearSelect.innerHTML = '';
+    
+    // Popola anni: inizia dal 2025 (anno corrente) fino al 2035
+    const startYear = 2025;
+    const endYear = 2035;
+    
+    for (let year = startYear; year <= endYear; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+    }
+    
+    // Inizializza mese corrente
+    const currentMonth = new Date().getMonth();
+    monthSelect.value = currentMonth;
+    
+    // Event listeners
+    yearSelect.addEventListener('change', updateWeekOptions);
+    monthSelect.addEventListener('change', updateWeekOptions);
+    weekSelect.addEventListener('change', loadSelectedWeekData);
+    
+    // Inizializza opzioni settimane
+    updateWeekOptions();
+};
     
     // Aggiorna le opzioni delle settimane in base a anno e mese
     const updateWeekOptions = () => {
