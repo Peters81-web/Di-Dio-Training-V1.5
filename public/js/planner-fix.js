@@ -1,5 +1,4 @@
-// Aggiungi questa funzione al file public/js/planner.js
-// oppure crea un nuovo file public/js/planner-fix.js
+// Versione corretta del file planner-fix.js che evita conflitti
 
 document.addEventListener('DOMContentLoaded', function() {
     // Seleziona il pulsante e il modal
@@ -51,10 +50,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Funzione di utilità per chiudere i modal
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
+// Nota: Non dichiariamo più la funzione closeModal qui
+// per evitare conflitti con quella già presente in planner.js
