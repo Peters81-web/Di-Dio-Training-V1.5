@@ -1,0 +1,105 @@
+/* Correzioni per la visualizzazione mobile */
+
+/* Fix per i giorni della settimana nella tabella */
+@media (max-width: 768px) {
+    /* Miglioramento della visualizzazione delle celle della tabella su mobile */
+    .summary-table td {
+        padding: 15px 15px 15px 15px; /* Rimuove il padding-left eccessivo */
+        text-align: left;
+        position: relative;
+        clear: both;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Migliora la visualizzazione delle label nelle celle */
+    .summary-table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-bottom: 8px;
+        display: block;
+        color: #555;
+    }
+    
+    /* Formattazione specifica per la cella del giorno */
+    .day-cell {
+        background-color: #f8f9fa;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+    }
+    
+    /* Modifica per evitare sovrapposizioni */
+    .day-date {
+        display: inline-block;
+        margin-left: auto;
+        font-weight: normal;
+        color: #777;
+    }
+    
+    /* Assicura che i campi di input occupino lo spazio corretto */
+    .workout-type-select,
+    .workout-description textarea {
+        width: 100%;
+        margin-top: 5px;
+    }
+}
+
+/* Correzioni per il menu mobile */
+@media (max-width: 768px) {
+    /* Stile di base per la navbar mobile */
+    .navbar .container {
+        position: relative;
+        padding: 1rem;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        z-index: 100;
+    }
+    
+    /* Stile per il menu nascosto */
+    .nav-links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        padding-top: 1rem;
+        gap: 0.5rem;
+    }
+    
+    /* Stile per il menu aperto */
+    .nav-links.active {
+        display: flex;
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    /* Animazione per l'apertura del menu */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Assicurarsi che i pulsanti del menu occupino tutta la larghezza */
+    .nav-links .btn {
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        justify-content: flex-start;
+    }
+}
