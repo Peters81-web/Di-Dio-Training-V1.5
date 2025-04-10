@@ -8,6 +8,61 @@ document.addEventListener('DOMContentLoaded', async function() {
     let workouts = [];
     let activities = [];
     
+    // Funzione per formattare correttamente la durata
+    function formatDuration(duration) {
+      // Gestisci caso undefined o null
+      if (duration === undefined || duration === null) {
+        return "0 minuti";
+      }
+      
+      // Se è già un numero, lo usiamo direttamente
+      if (typeof duration === 'number') {
+        return `${duration} minuti`;
+      }
+      
+      // Se è una stringa che potrebbe essere in formato HH:MM:SS
+      if (typeof duration === 'string') {
+        // Verifica se è nel formato HH:MM:SS
+        if (duration.includes(':')) {
+          // Split in ore, minuti, secondi
+          const parts = duration.split(':');
+          
+          // Caso speciale per il formato 00:00:XX (invece di considerarlo come secondi, lo trattiamo come minuti)
+          if (parts.length === 3 && parts[0] === '00' && parts[1] === '00') {
+            return `${parseInt(parts[2])} minuti`;
+          }
+          
+          // Normale gestione ore, minuti, secondi
+          let totalMinutes = 0;
+          if (parts.length === 3) {
+            // HH:MM:SS
+            totalMinutes = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            // Arrotondiamo i secondi al minuto più vicino se sono significativi
+            if (parseInt(parts[2]) >= 30) {
+              totalMinutes += 1;
+            }
+          } else if (parts.length === 2) {
+            // MM:SS
+            totalMinutes = parseInt(parts[0]);
+            // Arrotondiamo i secondi al minuto più vicino se sono significativi
+            if (parseInt(parts[1]) >= 30) {
+              totalMinutes += 1;
+            }
+          }
+          return `${totalMinutes} minuti`;
+        }
+        
+        // Se è una stringa numerica
+        const parsed = parseInt(duration);
+        if (!isNaN(parsed)) {
+          return `${parsed} minuti`;
+        }
+      }
+      
+      // Fallback
+      return "0 minuti";
+    }
+    
     // Elementi DOM
     const elements = {
         modal: document.getElementById('workoutModal'),
@@ -178,7 +233,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         </div>
                         <div class="mb-3">
                             <p class="mb-1"><strong>Obiettivo:</strong> ${workout.objective || 'Non specificato'}</p>
-                            <p class="mb-1"><strong>Durata:</strong> ${workout.total_duration || 0} minuti</p>
+                            <p class="mb-1"><strong>Durata:</strong> ${formatDuration(workout.total_duration)}</p>
                         </div>
                         <div class="d-flex justify-between mt-auto">
                             <button class="btn btn-outline btn-sm workout-details-btn" data-id="${workout.id}">
@@ -527,7 +582,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         <strong>Obiettivo:</strong> ${workout.objective || 'Non specificato'}
                     </div>
                     <div class="detail-item">
-                        <strong>Durata Totale:</strong> ${workout.total_duration || 0} minuti
+                        <strong>Durata Totale:</strong> ${formatDuration(workout.total_duration)}
                     </div>
                     
                     <div class="detail-section">
@@ -581,169 +636,187 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     
     // Funzione per mostrare il modal di completamento
-function showCompletionModal(workout) {
-    // Rimuovi eventuali modal esistenti
-    const existingModal = document.getElementById('completionModal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    // Ottieni la data odierna in formato YYYY-MM-DD per il valore predefinito
-    const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
-    
-    // Crea la nuova modal
-    const modalHtml = `
-        <div id="completionModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Registra Allenamento: ${workout.name || 'Allenamento'}</h2>
-                    <button type="button" class="modal-close" onclick="closeCompletionModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <form id="completionForm">
-                    <!-- Nuovo campo per la data dell'allenamento -->
-                    <div class="form-group">
-                        <label for="workoutDate">Data Allenamento</label>
-                        <input
-                            type="date"
-                            id="workoutDate"
-                            class="form-control"
-                            required
-                            value="${formattedDate}"
-                            max="${formattedDate}"
-                        >
-                        <small class="text-muted">Seleziona la data in cui hai svolto l'allenamento</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="intensityLevel">Livello di Intensità</label>
-                        <select id="intensityLevel" class="form-control" required>
-                            <option value="facile">Facile</option>
-                            <option value="normale" selected>Normale</option>
-                            <option value="difficile">Difficile</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="actualDuration">Durata Effettiva (minuti)</label>
-                        <input
-                            type="number"
-                            id="actualDuration"
-                            class="form-control"
-                            required
-                            min="1"
-                            value="${workout.total_duration || '30'}"
-                            placeholder="Es. 45"
-                        >
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="distanceCovered">Distanza Percorsa (km)</label>
-                        <input
-                            type="number"
-                            id="distanceCovered"
-                            class="form-control"
-                            min="0"
-                            step="0.1"
-                            value="0"
-                            placeholder="Es. 5.2"
-                        >
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="caloriesBurned">Calorie Bruciate (stima)</label>
-                        <input
-                            type="number"
-                            id="caloriesBurned"
-                            class="form-control"
-                            required
-                            min="0"
-                            value="100"
-                            placeholder="Es. 350"
-                        >
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="workoutNotes">Note sull'allenamento</label>
-                        <textarea
-                            id="workoutNotes"
-                            class="form-control"
-                            rows="3"
-                            placeholder="Come è andato l'allenamento? Inserisci qui le tue note..."
-                        ></textarea>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeCompletionModal()">
-                            <i class="fas fa-times"></i> Annulla
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-check"></i> Completa Allenamento
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    `;
-    
-    // Aggiungi la modal al body
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
-    // Mostra la modal
-    const modal = document.getElementById('completionModal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    
-    // Aggiungi event listener per il submit del form
-    const form = document.getElementById('completionForm');
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        try {
-            // Prendi i valori dai campi del form
-            const workoutDate = document.getElementById('workoutDate').value;
-            const intensityLevel = document.getElementById('intensityLevel').value;
-            const actualDuration = parseInt(document.getElementById('actualDuration').value);
-            const distanceCovered = parseFloat(document.getElementById('distanceCovered').value) || 0;
-            const caloriesBurned = parseInt(document.getElementById('caloriesBurned').value);
-            const notes = document.getElementById('workoutNotes').value;
-            
-            // Validazione
-            if (!workoutDate) {
-                throw new Error('Seleziona una data valida');
-            }
-            
-            if (isNaN(actualDuration) || actualDuration <= 0) {
-                throw new Error('La durata deve essere un numero maggiore di zero');
-            }
-            
-            if (isNaN(caloriesBurned) || caloriesBurned < 0) {
-                throw new Error('Le calorie devono essere un numero positivo');
-            }
-            
-            if (isNaN(distanceCovered) || distanceCovered < 0) {
-                throw new Error('La distanza deve essere un numero positivo');
-            }
-            
-            // Invia i dati per il completamento
-            await completeWorkout(workout.id, {
-                workout_date: workoutDate,
-                intensity_level: intensityLevel,
-                duration: actualDuration,
-                actual_duration: actualDuration,
-                distance: distanceCovered,
-                calories_burned: caloriesBurned,
-                notes: notes
-            });
-        } catch (error) {
-            console.error('Form submission error:', error);
-            UI.showToast(error.message || 'Errore durante l\'invio del form', 'error');
+    function showCompletionModal(workout) {
+        // Rimuovi eventuali modal esistenti
+        const existingModal = document.getElementById('completionModal');
+        if (existingModal) {
+            existingModal.remove();
         }
-    });
-}
+        
+        // Ottieni la data odierna in formato YYYY-MM-DD per il valore predefinito
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        
+        // Estrai la durata numerica per il form
+        let durationValue = 30; // Default
+        if (typeof workout.total_duration === 'number') {
+            durationValue = workout.total_duration;
+        } else if (typeof workout.total_duration === 'string') {
+            if (workout.total_duration.includes(':')) {
+                const parts = workout.total_duration.split(':');
+                // Caso speciale per 00:00:XX
+                if (parts.length === 3 && parts[0] === '00' && parts[1] === '00') {
+                    durationValue = parseInt(parts[2]);
+                } else if (parts.length === 3) {
+                    durationValue = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                }
+            } else {
+                durationValue = parseInt(workout.total_duration) || 30;
+            }
+        }
+        
+        // Crea la nuova modal
+        const modalHtml = `
+            <div id="completionModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Registra Allenamento: ${workout.name || 'Allenamento'}</h2>
+                        <button type="button" class="modal-close" onclick="closeCompletionModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="completionForm">
+                        <!-- Nuovo campo per la data dell'allenamento -->
+                        <div class="form-group">
+                            <label for="workoutDate">Data Allenamento</label>
+                            <input
+                                type="date"
+                                id="workoutDate"
+                                class="form-control"
+                                required
+                                value="${formattedDate}"
+                                max="${formattedDate}"
+                            >
+                            <small class="text-muted">Seleziona la data in cui hai svolto l'allenamento</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="intensityLevel">Livello di Intensità</label>
+                            <select id="intensityLevel" class="form-control" required>
+                                <option value="facile">Facile</option>
+                                <option value="normale" selected>Normale</option>
+                                <option value="difficile">Difficile</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="actualDuration">Durata Effettiva (minuti)</label>
+                            <input
+                                type="number"
+                                id="actualDuration"
+                                class="form-control"
+                                required
+                                min="1"
+                                value="${durationValue}"
+                                placeholder="Es. 45"
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="distanceCovered">Distanza Percorsa (km)</label>
+                            <input
+                                type="number"
+                                id="distanceCovered"
+                                class="form-control"
+                                min="0"
+                                step="0.1"
+                                value="0"
+                                placeholder="Es. 5.2"
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="caloriesBurned">Calorie Bruciate (stima)</label>
+                            <input
+                                type="number"
+                                id="caloriesBurned"
+                                class="form-control"
+                                required
+                                min="0"
+                                value="100"
+                                placeholder="Es. 350"
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="workoutNotes">Note sull'allenamento</label>
+                            <textarea
+                                id="workoutNotes"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Come è andato l'allenamento? Inserisci qui le tue note..."
+                            ></textarea>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeCompletionModal()">
+                                <i class="fas fa-times"></i> Annulla
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Completa Allenamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        // Aggiungi la modal al body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Mostra la modal
+        const modal = document.getElementById('completionModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Aggiungi event listener per il submit del form
+        const form = document.getElementById('completionForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                // Prendi i valori dai campi del form
+                const workoutDate = document.getElementById('workoutDate').value;
+                const intensityLevel = document.getElementById('intensityLevel').value;
+                const actualDuration = parseInt(document.getElementById('actualDuration').value);
+                const distanceCovered = parseFloat(document.getElementById('distanceCovered').value) || 0;
+                const caloriesBurned = parseInt(document.getElementById('caloriesBurned').value);
+                const notes = document.getElementById('workoutNotes').value;
+                
+                // Validazione
+                if (!workoutDate) {
+                    throw new Error('Seleziona una data valida');
+                }
+                
+                if (isNaN(actualDuration) || actualDuration <= 0) {
+                    throw new Error('La durata deve essere un numero maggiore di zero');
+                }
+                
+                if (isNaN(caloriesBurned) || caloriesBurned < 0) {
+                    throw new Error('Le calorie devono essere un numero positivo');
+                }
+                
+                if (isNaN(distanceCovered) || distanceCovered < 0) {
+                    throw new Error('La distanza deve essere un numero positivo');
+                }
+                
+                // Invia i dati per il completamento
+                await completeWorkout(workout.id, {
+                    workout_date: workoutDate,
+                    intensity_level: intensityLevel,
+                    duration: actualDuration,
+                    actual_duration: actualDuration,
+                    distance: distanceCovered,
+                    calories_burned: caloriesBurned,
+                    notes: notes
+                });
+            } catch (error) {
+                console.error('Form submission error:', error);
+                UI.showToast(error.message || 'Errore durante l\'invio del form', 'error');
+            }
+        });
+    }
     
     // Funzione per chiudere il modal di completamento
     function closeCompletionModal() {
@@ -758,57 +831,56 @@ function showCompletionModal(workout) {
     }
     
     // Funzione per registrare il completamento dell'allenamento
-
-async function completeWorkout(workoutId, completionData) {
-    const loading = UI.showLoading();
-    try {
-        // Verifica sessione utente
-        if (!currentUser) {
-            throw new Error('Utente non autenticato');
-        }
-        
-        // Crea un oggetto Date dalla stringa di data nel formato YYYY-MM-DD
-        const workoutDate = new Date(completionData.workout_date);
-        // Imposta l'ora alla fine della giornata (23:59:59) per assicurarsi che venga registrata correttamente
-        workoutDate.setHours(23, 59, 59, 999);
-        
-        console.log('Sending workout completion data:', {
-            workout_plan_id: workoutId,
-            user_id: currentUser.id,
-            ...completionData,
-            completed_at: workoutDate.toISOString()
-        });
-        
-        // Invia i dati al database
-        const { error } = await supabaseClient
-            .from('completed_workouts')
-            .insert([{
+    async function completeWorkout(workoutId, completionData) {
+        const loading = UI.showLoading();
+        try {
+            // Verifica sessione utente
+            if (!currentUser) {
+                throw new Error('Utente non autenticato');
+            }
+            
+            // Crea un oggetto Date dalla stringa di data nel formato YYYY-MM-DD
+            const workoutDate = new Date(completionData.workout_date);
+            // Imposta l'ora alla fine della giornata (23:59:59) per assicurarsi che venga registrata correttamente
+            workoutDate.setHours(23, 59, 59, 999);
+            
+            console.log('Sending workout completion data:', {
                 workout_plan_id: workoutId,
                 user_id: currentUser.id,
-                intensity_level: completionData.intensity_level,
-                duration: completionData.duration,
-                actual_duration: completionData.actual_duration,
-                distance: completionData.distance,
-                calories_burned: completionData.calories_burned,
-                notes: completionData.notes || '',
+                ...completionData,
                 completed_at: workoutDate.toISOString()
-            }]);
-                
-        if (error) {
-            console.error('Error details:', error);
-            throw new Error(`Errore nel completamento: ${error.message}`);
+            });
+            
+            // Invia i dati al database
+            const { error } = await supabaseClient
+                .from('completed_workouts')
+                .insert([{
+                    workout_plan_id: workoutId,
+                    user_id: currentUser.id,
+                    intensity_level: completionData.intensity_level,
+                    duration: completionData.duration,
+                    actual_duration: completionData.actual_duration,
+                    distance: completionData.distance,
+                    calories_burned: completionData.calories_burned,
+                    notes: completionData.notes || '',
+                    completed_at: workoutDate.toISOString()
+                }]);
+                    
+            if (error) {
+                console.error('Error details:', error);
+                throw new Error(`Errore nel completamento: ${error.message}`);
+            }
+            
+            UI.showToast('Allenamento completato con successo', 'success');
+            closeCompletionModal();
+            await loadStats(); // Aggiorna le statistiche
+        } catch (error) {
+            console.error('Error completing workout:', error);
+            UI.showToast('Errore nel salvataggio dell\'allenamento: ' + error.message, 'error');
+        } finally {
+            UI.hideLoading(loading);
         }
-        
-        UI.showToast('Allenamento completato con successo', 'success');
-        closeCompletionModal();
-        await loadStats(); // Aggiorna le statistiche
-    } catch (error) {
-        console.error('Error completing workout:', error);
-        UI.showToast('Errore nel salvataggio dell\'allenamento: ' + error.message, 'error');
-    } finally {
-        UI.hideLoading(loading);
     }
-}
     
     // Gestione degli eventi
     function handleSearch() {
