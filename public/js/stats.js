@@ -1,18 +1,65 @@
-;let currentUser = null;// Gestione della pagina statistiche - File completamente riscritto
+// Gestione della pagina statistiche - File completamente riscritto
 document.addEventListener('DOMContentLoaded', async function() {
     // Inizializzazione Supabase
     const supabaseClient = createSupabaseClient();
     
-// Variabili globali
-let currentUser = null;
-let activityChart = null;
-let weeklyChart = null;
-let selectedPeriod = {
-    type: 'week',   // 'week', 'month', o 'year'
-    year: 2025,     // Anno predefinito 2025 invece dell'anno corrente
-    month: new Date().getMonth(),
-    week: getCurrentWeekNumber()
-};
+    // Variabili globali
+    let currentUser = null;
+    let activityChart = null;
+    let weeklyChart = null;
+    let selectedPeriod = {
+        type: 'week',   // 'week', 'month', o 'year'
+        year: 2025,     // Anno predefinito 2025 invece dell'anno corrente
+        month: new Date().getMonth(),
+        week: getCurrentWeekNumber()
+    };
+    
+    // Funzione per formattare correttamente la durata
+    function formatDuration(duration) {
+        // Gestisci caso undefined o null
+        if (duration === undefined || duration === null) {
+            return "0 min";
+        }
+        
+        // Converti sempre in numero
+        let minutes = 0;
+        
+        // Se è già un numero
+        if (typeof duration === 'number') {
+            minutes = duration;
+        }
+        // Se è una stringa in formato HH:MM:SS
+        else if (typeof duration === 'string' && duration.includes(':')) {
+            const parts = duration.split(':');
+            
+            // Caso speciale per il formato 00:00:XX (invece di considerarlo come secondi, lo trattiamo come minuti)
+            if (parts.length === 3 && parts[0] === '00' && parts[1] === '00') {
+                minutes = parseInt(parts[2]);
+            }
+            // Normale gestione HH:MM:SS
+            else if (parts.length === 3) {
+                minutes = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            } 
+            // Formato MM:SS
+            else if (parts.length === 2) {
+                minutes = parseInt(parts[0]);
+            }
+        }
+        // Se è una stringa numerica
+        else if (typeof duration === 'string') {
+            minutes = parseInt(duration) || 0;
+        }
+        
+        // Formatta in ore e minuti per durate più lunghe
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        
+        if (hours > 0) {
+            return `${hours} h ${remainingMinutes > 0 ? remainingMinutes + ' min' : ''}`;
+        } else {
+            return `${minutes} min`;
+        }
+    }
     
     // Costanti
     const MONTHS = [
@@ -53,8 +100,9 @@ let selectedPeriod = {
             // Carica i dati
             await loadAllData();
             
-            // Gestione logout
+            // Gestione logout e reset
             setupLogout();
+            setupResetButton();
         } catch (error) {
             console.error('Initialization error:', error);
             showToast('Errore di inizializzazione', 'error');
@@ -89,6 +137,79 @@ let selectedPeriod = {
                     showToast('Errore durante il logout', 'error');
                 }
             });
+        }
+    }
+    
+    // Funzione per inizializzare il pulsante di reset
+    function setupResetButton() {
+        const resetBtn = document.getElementById('resetDataBtn');
+        const confirmResetBtn = document.getElementById('confirmResetBtn');
+        const resetModal = document.getElementById('resetConfirmModal');
+        
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                resetModal.style.display = 'flex';
+            });
+        }
+        
+        if (confirmResetBtn) {
+            confirmResetBtn.addEventListener('click', async () => {
+                await resetUserData();
+                resetModal.style.display = 'none';
+            });
+        }
+    }
+    
+    // Funzione per resettare i dati dell'utente
+    async function resetUserData() {
+        if (!currentUser) {
+            showToast('Errore: nessun utente autenticato', 'error');
+            return;
+        }
+        
+        const loading = showLoading();
+        try {
+            // Elimina tutti i workout completati dell'utente
+            const { error: deleteCompletedError } = await supabaseClient
+                .from('completed_workouts')
+                .delete()
+                .eq('user_id', currentUser.id);
+                
+            if (deleteCompletedError) throw deleteCompletedError;
+            
+            // Elimina tutti i workout pianificati dell'utente
+            const { error: deleteWorkoutsError } = await supabaseClient
+                .from('workout_plans')
+                .delete()
+                .eq('user_id', currentUser.id);
+                
+            if (deleteWorkoutsError) throw deleteWorkoutsError;
+            
+            // Elimina tutti i programmi di allenamento dell'utente
+            const { error: deleteProgramsError } = await supabaseClient
+                .from('training_programs')
+                .delete()
+                .eq('user_id', currentUser.id);
+                
+            if (deleteProgramsError) throw deleteProgramsError;
+            
+            // Elimina tutti i riepiloghi settimanali dell'utente
+            const { error: deleteSummariesError } = await supabaseClient
+                .from('weekly_summaries')
+                .delete()
+                .eq('user_id', currentUser.id);
+                
+            if (deleteSummariesError) throw deleteSummariesError;
+            
+            showToast('Tutti i dati sono stati eliminati con successo', 'success');
+            
+            // Ricarica i dati (che ora saranno vuoti)
+            await loadAllData();
+        } catch (error) {
+            console.error('Error resetting data:', error);
+            showToast('Errore durante l\'eliminazione dei dati: ' + error.message, 'error');
+        } finally {
+            hideLoading(loading);
         }
     }
     
@@ -428,17 +549,8 @@ let selectedPeriod = {
         // Calcola le metriche
         const metrics = calculatePerformanceMetrics(workouts);
         
-        // Verifica che la durata sia un numero valido
-        if (isNaN(metrics.totalDuration)) {
-            metrics.totalDuration = 0;
-        }
-        
-        // Formatta la durata in ore e minuti
+        // Formatta la durata correttamente
         const formattedDuration = formatDuration(metrics.totalDuration);
-        
-        // Debug - Verifica i valori calcolati
-        console.log('Metriche calcolate:', metrics);
-        console.log('Durata formattata:', formattedDuration);
         
         // Aggiorna il contenitore delle metriche
         elements.metrics.innerHTML = `
@@ -460,7 +572,7 @@ let selectedPeriod = {
             </div>
         `;
         
-        // Aggiungi stili CSS inline
+        // Aggiungi stili CSS alle metriche
         const metricItems = elements.metrics.querySelectorAll('.metric-item');
         metricItems.forEach(item => {
             item.style.backgroundColor = '#f8f9fa';
@@ -484,123 +596,6 @@ let selectedPeriod = {
         });
     }
     
-// Aggiungi queste funzioni al file stats.js
-
-// Funzione per inizializzare il pulsante di reset
-function setupResetButton() {
-    const resetBtn = document.getElementById('resetDataBtn');
-    const confirmResetBtn = document.getElementById('confirmResetBtn');
-    const resetModal = document.getElementById('resetConfirmModal');
-    
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            resetModal.style.display = 'flex';
-        });
-    }
-    
-    if (confirmResetBtn) {
-        confirmResetBtn.addEventListener('click', async () => {
-            await resetUserData();
-            resetModal.style.display = 'none';
-        });
-    }
-}
-
-// Funzione per resettare i dati dell'utente
-async function resetUserData() {
-    if (!currentUser) {
-        showToast('Errore: nessun utente autenticato', 'error');
-        return;
-    }
-    
-    const loading = showLoading();
-    try {
-        // Elimina tutti i workout completati dell'utente
-        const { error: deleteCompletedError } = await supabaseClient
-            .from('completed_workouts')
-            .delete()
-            .eq('user_id', currentUser.id);
-            
-        if (deleteCompletedError) throw deleteCompletedError;
-        
-        // Elimina tutti i workout pianificati dell'utente
-        const { error: deleteWorkoutsError } = await supabaseClient
-            .from('workout_plans')
-            .delete()
-            .eq('user_id', currentUser.id);
-            
-        if (deleteWorkoutsError) throw deleteWorkoutsError;
-        
-        // Elimina tutti i programmi di allenamento dell'utente
-        const { error: deleteProgramsError } = await supabaseClient
-            .from('training_programs')
-            .delete()
-            .eq('user_id', currentUser.id);
-            
-        if (deleteProgramsError) throw deleteProgramsError;
-        
-        // Elimina tutti i riepiloghi settimanali dell'utente
-        const { error: deleteSummariesError } = await supabaseClient
-            .from('weekly_summaries')
-            .delete()
-            .eq('user_id', currentUser.id);
-            
-        if (deleteSummariesError) throw deleteSummariesError;
-        
-        showToast('Tutti i dati sono stati eliminati con successo', 'success');
-        
-        // Ricarica i dati (che ora saranno vuoti)
-        await loadAllData();
-    } catch (error) {
-        console.error('Error resetting data:', error);
-        showToast('Errore durante l\'eliminazione dei dati: ' + error.message, 'error');
-    } finally {
-        hideLoading(loading);
-    }
-}
-
-// Aggiorna la funzione init per chiamare setupResetButton
-async function init() {
-    try {
-        // Verifica autenticazione
-        const session = await checkAuth();
-        if (!session) return;
-        currentUser = session.user;
-        
-        // Inizializza selettori di periodo
-        initPeriodSelectors();
-        
-        // Carica i dati
-        await loadAllData();
-        
-        // Gestione logout e reset
-        setupLogout();
-        setupResetButton();
-    } catch (error) {
-        console.error('Initialization error:', error);
-        showToast('Errore di inizializzazione', 'error');
-    }
-}
-
-function formatDuration(totalMinutes) {
-    if (typeof totalMinutes !== 'number' || isNaN(totalMinutes)) {
-        totalMinutes = 0;
-    }
-    
-    if (totalMinutes === 0) return "0 min";
-    
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = Math.floor(totalMinutes % 60);
-    
-    if (hours === 0) {
-        return `${minutes} min`;
-    } else if (minutes === 0) {
-        return `${hours} h`;
-    } else {
-        return `${hours} h ${minutes} min`;
-    }
-}
-
     function updateAchievements(workouts) {
         // Calcola gli achievements
         const achievements = calculateAchievements(workouts);
@@ -765,9 +760,6 @@ function formatDuration(totalMinutes) {
     }
     
     function calculatePerformanceMetrics(workouts) {
-        // Log per debug
-        console.log('Calcolo metriche su', workouts.length, 'allenamenti');
-        
         // Se non ci sono workout, restituisci valori predefiniti
         if (!workouts || workouts.length === 0) {
             return {
@@ -781,192 +773,242 @@ function formatDuration(totalMinutes) {
         // Calcola la durata totale verificando ogni possibile campo di durata
         let totalDuration = 0;
         for (const workout of workouts) {
-            // Logga i dettagli di ogni workout per debug
-            console.log('Workout ID:', workout.id, 'Durata:', workout.duration, 'Actual Duration:', workout.actual_duration);
-            
             // Considera tutti i possibili campi di durata, in ordine di priorità
-            const duration = workout.actual_duration || workout.duration || 0;
+            let duration;
             
-            // Verifica che sia un numero valido
-            if (!isNaN(duration)) {
-                totalDuration += duration;
+            if (typeof workout.actual_duration === 'number') {
+                duration = workout.actual_duration;
+            } else if (typeof workout.duration === 'number') {
+                duration = workout.duration;
+            } else if (typeof workout.actual_duration === 'string' && workout.actual_duration.includes(':')) {
+                // Formato HH:MM:SS
+                const parts = workout.actual_duration.split(':');
+                // Caso speciale per il formato 00:00:XX (invece di considerarlo come secondi, lo trattiamo come minuti)
+                if (parts.length === 3 && parts[0] === '00' && parts[1] === '00') {
+                    duration = parseInt(parts[2]);
+                } else if (parts.length === 3) {
+                    duration = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                } else if (parts.length === 2) {
+                    duration = parseInt(parts[0]);
+                }
+            } else if (typeof workout.duration === 'string' && workout.duration.includes(':')) {
+                // Formato HH:MM:SS
+                const parts = workout.duration.split(':');
+                // Caso speciale per il formato 00:00:XX (invece di considerarlo come secondi, lo trattiamo come minuti)
+                if (parts.length === 3 && parts[0] === '00' && parts[1] === '00') {
+                    duration = parseInt(parts[2]);
+                } else if (parts.length === 3) {
+                    duration = parseInt(parts[0]);
+                }
+                    if (parts.length === 3 && parts[0] === '00' && parts[1] === '00') {
+                        duration = parseInt(parts[2]);
+                    } else if (parts.length === 3) {
+                        duration = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                    } else if (parts.length === 2) {
+                        duration = parseInt(parts[0]);
+                    }
+                } else {
+                    // Tenta di convertire qualsiasi stringa in un numero
+                    duration = parseInt(workout.actual_duration || workout.duration || 0);
+                }
+                
+                // Verifica che sia un numero valido
+                if (!isNaN(duration)) {
+                    totalDuration += duration;
+                }
             }
+            
+            return {
+                totalWorkouts: workouts.length,
+                totalDuration: totalDuration,
+                totalDistance: workouts.reduce((sum, w) => sum + (parseFloat(w.distance) || 0), 0),
+                totalCalories: workouts.reduce((sum, w) => sum + (parseInt(w.calories_burned) || 0), 0)
+            };
         }
         
-        console.log('Durata totale calcolata:', totalDuration);
-        
-        return {
-            totalWorkouts: workouts.length,
-            totalDuration: totalDuration,
-            totalDistance: workouts.reduce((sum, w) => sum + (parseFloat(w.distance) || 0), 0),
-            totalCalories: workouts.reduce((sum, w) => sum + (parseInt(w.calories_burned) || 0), 0)
-        };
-    }
-    
-    function calculateAchievements(workouts) {
-        const achievements = [];
-        
-        // Se non ci sono workout, restituisci un array vuoto
-        if (workouts.length === 0) {
+        function calculateAchievements(workouts) {
+            const achievements = [];
+            
+            // Se non ci sono workout, restituisci un array vuoto
+            if (workouts.length === 0) {
+                return achievements;
+            }
+            
+            // Achievement: Completati 3+ allenamenti
+            if (workouts.length >= 3) {
+                achievements.push({
+                    icon: 'fas fa-award',
+                    title: 'Costanza',
+                    description: `${workouts.length} allenamenti completati`
+                });
+            }
+            
+            // Achievement: Distanza totale >= 10km
+            const totalDistance = workouts.reduce((sum, w) => sum + (w.distance || 0), 0);
+            if (totalDistance >= 10) {
+                achievements.push({
+                    icon: 'fas fa-road',
+                    title: 'Maratoneta',
+                    description: `${totalDistance.toFixed(1)}km percorsi`
+                });
+            }
+            
+            // Achievement: Durata media >= 30 minuti
+            const avgDuration = workouts.reduce((sum, w) => {
+                // Estrai la durata correttamente
+                let duration = 0;
+                if (typeof w.actual_duration === 'number') {
+                    duration = w.actual_duration;
+                } else if (typeof w.duration === 'number') {
+                    duration = w.duration;
+                } else if (typeof w.actual_duration === 'string' && w.actual_duration.includes(':')) {
+                    const parts = w.actual_duration.split(':');
+                    // Caso speciale per il formato 00:00:XX
+                    if (parts.length === 3 && parts[0] === '00' && parts[1] === '00') {
+                        duration = parseInt(parts[2]);
+                    } else if (parts.length === 3) {
+                        duration = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                    }
+                } else if (typeof w.duration === 'string') {
+                    duration = parseInt(w.duration) || 0;
+                }
+                return sum + duration;
+            }, 0) / workouts.length;
+            
+            if (avgDuration >= 30) {
+                achievements.push({
+                    icon: 'fas fa-stopwatch',
+                    title: 'Resistenza',
+                    description: `${Math.round(avgDuration)} min di durata media`
+                });
+            }
+            
+            // Achievement: Allenamenti in 3+ giorni diversi
+            const uniqueDays = new Set();
+            workouts.forEach(workout => {
+                const date = new Date(workout.completed_at);
+                uniqueDays.add(date.toDateString());
+            });
+            
+            if (uniqueDays.size >= 3) {
+                achievements.push({
+                    icon: 'fas fa-calendar-check',
+                    title: 'Regolarità',
+                    description: `Allenamenti in ${uniqueDays.size} giorni diversi`
+                });
+            }
+            
             return achievements;
         }
         
-        // Achievement: Completati 3+ allenamenti
-        if (workouts.length >= 3) {
-            achievements.push({
-                icon: 'fas fa-award',
-                title: 'Costanza',
-                description: `${workouts.length} allenamenti completati`
-            });
+        // Funzioni di utilità per le date
+        function getCurrentWeekNumber() {
+            return getWeekNumber(new Date())[1];
         }
         
-        // Achievement: Distanza totale >= 10km
-        const totalDistance = workouts.reduce((sum, w) => sum + (w.distance || 0), 0);
-        if (totalDistance >= 10) {
-            achievements.push({
-                icon: 'fas fa-road',
-                title: 'Maratoneta',
-                description: `${totalDistance.toFixed(1)}km percorsi`
-            });
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return [
+                d.getUTCFullYear(), 
+                Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+            ];
         }
         
-        // Achievement: Durata media >= 30 minuti
-        const avgDuration = workouts.reduce((sum, w) => sum + (w.duration || 0), 0) / workouts.length;
-        if (avgDuration >= 30) {
-            achievements.push({
-                icon: 'fas fa-stopwatch',
-                title: 'Resistenza',
-                description: `${Math.round(avgDuration)} min di durata media`
-            });
+        function getWeeksInYear(year) {
+            const lastDay = new Date(year, 11, 31);
+            return getWeekNumber(lastDay)[1];
         }
         
-        // Achievement: Allenamenti in 3+ giorni diversi
-        const uniqueDays = new Set();
-        workouts.forEach(workout => {
-            const date = new Date(workout.completed_at);
-            uniqueDays.add(date.toDateString());
-        });
-        
-        if (uniqueDays.size >= 3) {
-            achievements.push({
-                icon: 'fas fa-calendar-check',
-                title: 'Regolarità',
-                description: `Allenamenti in ${uniqueDays.size} giorni diversi`
-            });
-        }
-        
-        return achievements;
-    }
-    
-    // Funzioni di utilità per le date
-    function getCurrentWeekNumber() {
-        return getWeekNumber(new Date())[1];
-    }
-    
-    function getWeekNumber(date) {
-        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-        const dayNum = d.getUTCDay() || 7;
-        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-        return [
-            d.getUTCFullYear(), 
-            Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
-        ];
-    }
-    
-    function getWeeksInYear(year) {
-        const lastDay = new Date(year, 11, 31);
-        return getWeekNumber(lastDay)[1];
-    }
-    
- 
-function getWeekDates(year, weekNum) {
-    // Calcolo semplificato: inizia dal 1 gennaio e aggiunge 7 giorni per ogni settimana
-    const startDate = new Date(year, 0, 1 + (weekNum - 1) * 7);
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 6);
-    
-    return { start: startDate, end: endDate };
-}
-    
-    function getPeriodDateRange() {
-        let start, end;
-        
-        switch (selectedPeriod.type) {
-            case 'week':
-                const weekDates = getWeekDates(selectedPeriod.year, selectedPeriod.week);
-                start = weekDates.start;
-                end = weekDates.end;
-                break;
-                
-            case 'month':
-                start = new Date(selectedPeriod.year, selectedPeriod.month, 1);
-                end = new Date(selectedPeriod.year, selectedPeriod.month + 1, 0);
-                break;
-                
-            case 'year':
-                start = new Date(selectedPeriod.year, 0, 1);
-                end = new Date(selectedPeriod.year, 11, 31);
-                break;
-        }
-        
-        // Imposta l'ora di inizio a 00:00:00 e l'ora di fine a 23:59:59
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-        
-        return { start, end };
-    }
-    
-    function formatDate(date, options = {}) {
-        const defaultOptions = { day: 'numeric', month: 'numeric', year: 'numeric' };
-        return date.toLocaleDateString('it-IT', { ...defaultOptions, ...options });
-    }
-    
-    function isSameDay(date1, date2) {
-        return date1.getDate() === date2.getDate() &&
-               date1.getMonth() === date2.getMonth() &&
-               date1.getFullYear() === date2.getFullYear();
-    }
-    
-    // Funzioni di utilità per l'UI
-    function showNoDataMessage(chartElement, message) {
-        // Verifico se il messaggio è già presente
-        let messageElement = chartElement.parentNode.querySelector('.no-data-message');
-        
-        if (!messageElement) {
-            messageElement = document.createElement('div');
-            messageElement.className = 'no-data-message';
-            messageElement.style.position = 'absolute';
-            messageElement.style.top = '50%';
-            messageElement.style.left = '50%';
-            messageElement.style.transform = 'translate(-50%, -50%)';
-            messageElement.style.textAlign = 'center';
-            messageElement.style.color = '#888';
-            messageElement.style.fontSize = '0.9rem';
-            messageElement.style.width = '100%';
+        function getWeekDates(year, weekNum) {
+            // Calcolo semplificato: inizia dal 1 gennaio e aggiunge 7 giorni per ogni settimana
+            const startDate = new Date(year, 0, 1 + (weekNum - 1) * 7);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
             
-            chartElement.parentNode.appendChild(messageElement);
+            return { start: startDate, end: endDate };
         }
         
-        messageElement.innerHTML = `
-            <i class="fas fa-info-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-            <p>${message}</p>
-        `;
-        
-        // Riduci l'opacità del canvas
-        chartElement.style.opacity = '0.2';
-    }
-    
-    function hideNoDataMessage(chartElement) {
-        const messageElement = chartElement.parentNode.querySelector('.no-data-message');
-        if (messageElement) {
-            messageElement.remove();
+        function getPeriodDateRange() {
+            let start, end;
+            
+            switch (selectedPeriod.type) {
+                case 'week':
+                    const weekDates = getWeekDates(selectedPeriod.year, selectedPeriod.week);
+                    start = weekDates.start;
+                    end = weekDates.end;
+                    break;
+                    
+                case 'month':
+                    start = new Date(selectedPeriod.year, selectedPeriod.month, 1);
+                    end = new Date(selectedPeriod.year, selectedPeriod.month + 1, 0);
+                    break;
+                    
+                case 'year':
+                    start = new Date(selectedPeriod.year, 0, 1);
+                    end = new Date(selectedPeriod.year, 11, 31);
+                    break;
+            }
+            
+            // Imposta l'ora di inizio a 00:00:00 e l'ora di fine a 23:59:59
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 999);
+            
+            return { start, end };
         }
         
-        // Ripristina l'opacità del canvas
-        chartElement.style.opacity = '1';
-    }
-    
-    // Inizializzazione
-    init();
-});
+        function formatDate(date, options = {}) {
+            const defaultOptions = { day: 'numeric', month: 'numeric', year: 'numeric' };
+            return date.toLocaleDateString('it-IT', { ...defaultOptions, ...options });
+        }
+        
+        function isSameDay(date1, date2) {
+            return date1.getDate() === date2.getDate() &&
+                   date1.getMonth() === date2.getMonth() &&
+                   date1.getFullYear() === date2.getFullYear();
+        }
+        
+        // Funzioni di utilità per l'UI
+        function showNoDataMessage(chartElement, message) {
+            // Verifico se il messaggio è già presente
+            let messageElement = chartElement.parentNode.querySelector('.no-data-message');
+            
+            if (!messageElement) {
+                messageElement = document.createElement('div');
+                messageElement.className = 'no-data-message';
+                messageElement.style.position = 'absolute';
+                messageElement.style.top = '50%';
+                messageElement.style.left = '50%';
+                messageElement.style.transform = 'translate(-50%, -50%)';
+                messageElement.style.textAlign = 'center';
+                messageElement.style.color = '#888';
+                messageElement.style.fontSize = '0.9rem';
+                messageElement.style.width = '100%';
+                
+                chartElement.parentNode.appendChild(messageElement);
+            }
+            
+            messageElement.innerHTML = `
+                <i class="fas fa-info-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                <p>${message}</p>
+            `;
+            
+            // Riduci l'opacità del canvas
+            chartElement.style.opacity = '0.2';
+        }
+        
+        function hideNoDataMessage(chartElement) {
+            const messageElement = chartElement.parentNode.querySelector('.no-data-message');
+            if (messageElement) {
+                messageElement.remove();
+            }
+            
+            // Ripristina l'opacità del canvas
+            chartElement.style.opacity = '1';
+        }
+        
+        // Inizializzazione
+        init();
+    });
