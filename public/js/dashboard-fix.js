@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         'walking': '🚶‍♂️',
         'nuoto': '🏊‍♂️',
         'swimming': '🏊‍♂️',
-        'ciclismo': '🚴‍♂️',
+        'spin bike': '🚴‍♂️',
         'cycling': '🚴‍♂️',
         'yoga': '🧘‍♂️',
         'pilates': '🧘‍♀️',
