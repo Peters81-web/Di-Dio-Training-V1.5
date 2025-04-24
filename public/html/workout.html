@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crea Allenamento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/enhanced-design.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="navbar-brand">
+                <i class="fas fa-dumbbell mr-2"></i>
+                Crea Nuovo Allenamento
+            </h1>
+            <div class="nav-links">
+                <button onclick="window.location.href='/dashboard'" class="btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Torna alla Dashboard</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding-top: 1.5rem; padding-bottom: 2rem;">
+        <div class="card">
+            <form id="workoutForm" style="display: grid; gap: 1.5rem;">
+                <!-- Sezione Info Base -->
+                <div class="form-section">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-color);">Informazioni Base</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="workoutName">Nome Allenamento</label>
+                            <input
+                                type="text"
+                                id="workoutName"
+                                class="form-control"
+                                required
+                                placeholder="Es. HIIT Cardio, Forza Gambe..."
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="activityType">Tipo di Attività</label>
+                            <select id="activityType" class="form-control" required>
+                                <!-- Popolato dinamicamente -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sezione Dettagli -->
+                <div class="form-section">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-color);">Dettagli Allenamento</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="duration">Durata (minuti)</label>
+                            <input
+                                type="number"
+                                id="duration"
+                                class="form-control"
+                                required
+                                min="1"
+                                placeholder="Es. 45"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="difficulty">Livello Difficoltà</label>
+                            <select id="difficulty" class="form-control" required>
+                                <option value="principiante">Principiante</option>
+                                <option value="intermedio">Intermedio</option>
+                                <option value="avanzato">Avanzato</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="objective">Obiettivo</label>
+                        <input
+                            type="text"
+                            id="objective"
+                            class="form-control"
+                            required
+                            placeholder="Es. Miglioramento resistenza, Tonificazione..."
+                        >
+                    </div>
+                </div>
+
+                <!-- Sezione Fasi -->
+                <div class="form-section">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-color);">Fasi dell'Allenamento</h3>
+                    <div style="display: grid; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="warmup">Riscaldamento</label>
+                            <textarea
+                                id="warmup"
+                                class="form-control"
+                                rows="3"
+                                required
+                                placeholder="Descrivi gli esercizi di riscaldamento..."
+                            ></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="mainPhase">Fase Principale</label>
+                            <textarea
+                                id="mainPhase"
+                                class="form-control"
+                                rows="4"
+                                required
+                                placeholder="Descrivi gli esercizi principali..."
+                            ></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="cooldown">Defaticamento</label>
+                            <textarea
+                                id="cooldown"
+                                class="form-control"
+                                rows="3"
+                                required
+                                placeholder="Descrivi gli esercizi di defaticamento..."
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note Aggiuntive -->
+                <div class="form-section">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-color);">Note Aggiuntive</h3>
+                    <div class="form-group">
+                        <textarea
+                            id="notes"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Aggiungi eventuali note o raccomandazioni..."
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Pulsanti Form -->
+                <div class="modal-actions">
+                    <button type="button" onclick="window.location.href='/dashboard'" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Annulla
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salva Allenamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="/css/workout-form.css">
+    <script src="/js/utils.js"></script>
+    <script src="/js/supabase-config.js"></script>
+    <script src="/js/workout-editor.js"></script>
+    <script src="/js/workout.js"></script>
+</body>
+</html>
