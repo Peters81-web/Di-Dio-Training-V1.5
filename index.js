@@ -51,6 +51,10 @@ app.get('/dashboard', (req, res) => {
     sendHtmlFile(res, 'dashboard.html');
 });
 
+app.get('/ai-trainer', (req, res) => {
+    sendHtmlFile(res, 'ai-trainer.html');
+});
+
 app.get('/workout', (req, res) => {
     sendHtmlFile(res, 'workout.html');
 });
